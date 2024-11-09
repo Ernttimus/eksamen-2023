@@ -3,9 +3,10 @@ name: Publish Docker image
 on:
   push:
     branches:
+      - main
 
 jobs:
-  buid_and_publush_dockergiot :
+  build_and_publish_docker_image:
     name: Push Docker image to ECR
     runs-on: ubuntu-latest
     steps:
@@ -20,6 +21,7 @@ jobs:
           aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 244530008913.dkr.ecr.eu-west-1.amazonaws.com
           rev=$(git rev-parse --short HEAD)
           docker build . -t hello
+
       - name: Push docker image on main branch push
         if: github.ref == 'refs/heads/main'
         env:
@@ -30,4 +32,3 @@ jobs:
           docker tag hello 244530008913.dkr.ecr.eu-west-1.amazonaws.com/vincent-ppe:latest
           docker push 244530008913.dkr.ecr.eu-west-1.amazonaws.com/vincent-ppe:$rev
           docker push 244530008913.dkr.ecr.eu-west-1.amazonaws.com/vincent-ppe:latest
-          
