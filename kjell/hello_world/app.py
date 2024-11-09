@@ -2,23 +2,19 @@ import json
 import boto3
 import os
 
-# Denne koden kan også kjøres som en selvstendig applikasjon (Uten SAM) bare gjøre følgende
-# (dersom man har python på maskinen sin altså...)
-#
-# Instruksjoner for å kjøre ... (Kan sikkert lage container senere ..)
-#
-# pip3 install -r requirements.txt
-# python3 app.py
-#
-# Hilsen Kjell
-
+# Initialize AWS clients with region configuration
 s3_client = boto3.client('s3', region_name='eu-west-1')
 rekognition_client = boto3.client('rekognition', region_name='eu-west-1')
 
-# Hmm.. Må huske å gjøre dette bedre, når jeg får tid...
-BUCKET_NAME = "kjellsimagebucker"
+# Retrieve the bucket name from an environment variable
+BUCKET_NAME = os.environ.get("BUCKET_NAME")
 
 def lambda_handler(event, context):
+    if not BUCKET_NAME:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Bucket name is not set in environment variables"})
+        }
 
     # List all objects in the S3 bucket
     paginator = s3_client.get_paginator('list_objects_v2')
@@ -43,7 +39,9 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "body":  json.dumps(rekognition_results),
+        "body": json.dumps(rekognition_results),
     }
 
-print(lambda_handler(None, None))
+# Example standalone execution
+if __name__ == "__main__":
+    print(lambda_handler(None, None))
